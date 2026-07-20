@@ -150,7 +150,7 @@ var timingThemeOpt = new Option<string?>(
     "PlantUML theme (cyborg, crt-green, hacker, mono, …). Timing gallery themes work; use lowercase e.g. sunlust");
 var timingCmd = new Command(
     "timing",
-    "Unity .playable → PlantUML timing diagram (one concise lane per track, clip = state)")
+    "Unity .playable → PlantUML timing diagram + lossless embed for reverse")
 {
     playableArg,
     timingOutOpt,
@@ -180,8 +180,42 @@ timingCmd.SetHandler((InvocationContext ctx) =>
         }
 
         Console.WriteLine($"Wrote {Path.GetFullPath(dest)}");
-        Console.WriteLine("---");
-        Console.Write(puml);
+        Console.WriteLine($"embed_sha256={PlayableEmbed.Sha256Hex(File.ReadAllBytes(playable.FullName))}");
+        // Don't dump multi-MB base64 to stdout; print visual head only
+        var cut = puml.IndexOf(PlayableEmbed.BeginMarker, StringComparison.Ordinal);
+        Console.Write(cut > 0 ? puml[..cut] : puml);
+        if (cut > 0)
+        {
+            Console.WriteLine($"' … {PlayableEmbed.BeginMarker} (payload omitted from console) …");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        ctx.ExitCode = 1;
+    }
+});
+
+var pumlArg = new Argument<FileInfo>("puml", "Path to .timing.puml with lossless embed");
+var fromOutOpt = new Option<FileInfo?>("--out", "Write recovered .playable here (default: <puml>.playable)");
+var fromTimingCmd = new Command(
+    "from-timing",
+    "Recover original Unity .playable from puml embed (byte-identical; no YAML rewrite)")
+{
+    pumlArg,
+    fromOutOpt,
+};
+fromTimingCmd.SetHandler((InvocationContext ctx) =>
+{
+    var puml = ctx.ParseResult.GetValueForArgument(pumlArg);
+    var outFile = ctx.ParseResult.GetValueForOption(fromOutOpt);
+    try
+    {
+        var dest = outFile?.FullName
+                   ?? Path.ChangeExtension(puml.FullName, ".playable");
+        PlayableEmbed.WritePlayableFromPuml(puml.FullName, dest);
+        var bytes = File.ReadAllBytes(dest);
+        Console.WriteLine($"Wrote {Path.GetFullPath(dest)} bytes={bytes.Length} sha256={PlayableEmbed.Sha256Hex(bytes)}");
     }
     catch (Exception ex)
     {
@@ -195,6 +229,7 @@ var root = new RootCommand("Vex.TimelineSmith — offline tools")
     tracksCmd,
     run,
     timingCmd,
+    fromTimingCmd,
     runIr,
     validate,
     compile,

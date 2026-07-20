@@ -44,9 +44,10 @@ public static class PlayableTimingDiagram
     public static int PickPixelsPerFrame(double frameRate, int maxLabelChars)
     {
         var oneSecond = DefaultAxisLabelStep(frameRate);
-        var minClipPx = Math.Max(140, maxLabelChars * 9);
+        var minClipPx = Math.Max(160, maxLabelChars * 9);
         var ppf = (int)Math.Ceiling(minClipPx / (double)Math.Max(1, oneSecond));
-        return Math.Clamp(ppf, 3, 12);
+        // ≥4px/frame keeps nearby labels (109 vs 120) from stacking on the axis
+        return Math.Clamp(ppf, 4, 12);
     }
 
     // Keep name for tests/callers that still say Step
@@ -160,6 +161,8 @@ public static class PlayableTimingDiagram
             }
         }
 
+        // Bottom axis labels: always major grid (0,60,120,…) AND clip/blend edges.
+        // Do not drop majors near edges — that hid "120" while a highlight still drew a line.
         var labelFrames = new SortedSet<int>();
         if (sim.DurationFrames > 0)
         {
@@ -172,18 +175,10 @@ public static class PlayableTimingDiagram
             labelFrames.Add(e);
         }
 
-        var majorClearance = Math.Max(12, labelStep / 5);
         for (var f = 0; f <= sim.DurationFrames; f += labelStep)
         {
-            if (edgeFrames.Any(e => e != f && Math.Abs(e - f) < majorClearance))
-            {
-                continue;
-            }
-
             labelFrames.Add(f);
         }
-
-        // Do not add a free-floating major past the last real time (avoids empty tail labels)
 
         foreach (var f in labelFrames)
         {
@@ -265,12 +260,55 @@ public static class PlayableTimingDiagram
             sb.AppendLine();
         }
 
+        // Major-frame guide lines every 60f (0, 60, 120, …) — always, even near clip edges.
+        // Use f → f+0.01 (not f → f+1): a 1-frame band draws two edges (double line).
+        sb.AppendLine("' --- major frame guides ---");
+        for (var f = 0; f <= sim.DurationFrames; f += labelStep)
+        {
+            sb.AppendLine(CultureInfo.InvariantCulture,
+                $"highlight {f} to {f.ToString(CultureInfo.InvariantCulture)}.01 #B0B0B0");
+        }
+
+        sb.AppendLine();
         sb.AppendLine("@enduml");
         return sb.ToString();
     }
 
-    public static string GenerateFromFile(string playablePath, Options? options = null) =>
-        Generate(PlayableRun.FromFile(playablePath), options);
+    /// <summary>
+    /// playable → puml. Visual diagram is independent; original file bytes are
+    /// embedded losslessly for reverse (<see cref="PlayableEmbed"/>).
+    /// If visual inspect fails, still emits a minimal stub diagram + full embed
+    /// so reverse recovery never depends on the visual parser.
+    /// </summary>
+    public static string GenerateFromFile(string playablePath, Options? options = null)
+    {
+        var bytes = File.ReadAllBytes(playablePath);
+        string visual;
+        try
+        {
+            var text = File.ReadAllText(playablePath);
+            if (text.Length >= 1 && text[0] == '\uFEFF')
+            {
+                text = text[1..];
+            }
+
+            var report = PlayableInspector.InspectYaml(text, playablePath);
+            var sim = PlayableRun.FromReport(report);
+            visual = Generate(sim, options);
+        }
+        catch (Exception ex)
+        {
+            // Lossless reverse must still work; visual is best-effort only.
+            visual =
+                "@startuml\n" +
+                $"' Visual inspect failed for {playablePath.Replace("\\", "\\\\", StringComparison.Ordinal)}: {ex.Message.Replace('\n', ' ')}\n" +
+                "' (lossless embed still attached below)\n" +
+                "@enduml\n";
+        }
+
+        // Embed original bytes (not re-encoded text) for 100% byte identity on reverse.
+        return PlayableEmbed.AppendEmbed(visual, bytes);
+    }
 
     private static string ResolveStateAt(
         PlayableRun.Sim sim,

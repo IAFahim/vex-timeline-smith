@@ -20,8 +20,12 @@ public class PlayableTimingDiagramTests
         puml.Should().Contain("@0 as :0");
         puml.Should().Contain("@60 as :60");
         puml.Should().Contain("@109 as :109");
+        puml.Should().Contain("@120 as :120"); // major bottom label always kept
         puml.Should().Contain("@169 as :169");
-        puml.Should().NotContain("@120 as :120");
+        // single-line major guides every 60f including 120
+        puml.Should().Contain("highlight 60 to 60.01");
+        puml.Should().Contain("highlight 0 to 0.01");
+        puml.Should().Contain("highlight 120 to 120.01");
         puml.Should().Contain("<->");
         puml.Should().Contain(": 60");
         puml.Should().NotContain("{60");
