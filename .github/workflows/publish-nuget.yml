@@ -1,0 +1,69 @@
+# NuGet Trusted Publishing (OIDC) — policy on nuget.org must name this file exactly:
+#   Workflow File: publish-nuget.yml
+#   Repository:    IAFahim/vex-timeline-smith
+name: publish-nuget
+
+on:
+  # Ship: git tag v0.1.0 && git push origin v0.1.0
+  push:
+    tags:
+      - "v*"
+  # Manual: Actions → publish-nuget → Run workflow
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for NuGet Trusted Publishing OIDC
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Test
+        run: dotnet test -c Release --nologo
+
+      - name: Pack
+        run: |
+          mkdir -p artifacts/nuget
+          for proj in \
+            src/Vex.TimelineSmith.Ir \
+            src/Vex.TimelineSmith.Runtime \
+            src/Vex.TimelineSmith.Compiler \
+            src/Vex.TimelineSmith.UnityYaml \
+            src/Vex.TimelineSmith.Tool
+          do
+            dotnet pack "$proj" -c Release --nologo
+          done
+          ls -la artifacts/nuget/
+
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          # nuget.org profile name (not email)
+          user: iafahim
+
+      - name: Push packages
+        run: |
+          shopt -s nullglob
+          pkgs=(artifacts/nuget/*.nupkg)
+          if (( ${#pkgs[@]} == 0 )); then
+            echo "No nupkg files found" >&2
+            exit 1
+          fi
+          # Skip .snupkg in the glob — push nupkg first; symbols follow via --skip-duplicate friendly push
+          for pkg in "${pkgs[@]}"; do
+            echo "Pushing $pkg"
+            dotnet nuget push "$pkg" \
+              --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done

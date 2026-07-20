@@ -35,18 +35,27 @@ public static class PlayableTimingDiagram
         /// <summary>Max chars in clip bubble; longer names are truncated with …</summary>
         int MaxClipLabelChars = 12);
 
-        /// <summary>How many label chars fit in a clip of this length (px/frame).</summary>
+        /// <summary>
+        /// How many label chars fit in a clip capsule (px/frame).
+        /// Always ≥1 for a real clip — never hide a clip as PlantUML <c>{-}</c> (flat/unlabeled).
+        /// Short clips also get the name on the duration arrow above the bar.
+        /// </summary>
         public static int LabelCharsForClip(int durationFrames, int pixelsPerFrame, int maxChars)
         {
-            // ~7px per character in PlantUML capsules; leave margin for diamond ends
-            var fit = Math.Max(0, (durationFrames * pixelsPerFrame - 16) / 7);
-            if (fit < 1)
+            if (maxChars < 1)
             {
-                return 0; // too short — empty bubble, duration arrow carries the number
+                return 0;
             }
 
+            // ~7px per character; margin for diamond ends.
+            var fit = Math.Max(1, (durationFrames * pixelsPerFrame - 16) / 7);
             return Math.Min(maxChars, fit);
         }
+
+        /// <summary>True when the capsule is too narrow for a readable name — put name on the constraint arrow.</summary>
+        public static bool PreferNameOnArrow(int durationFrames, int pixelsPerFrame, int maxChars) =>
+            durationFrames < 30
+            || LabelCharsForClip(durationFrames, pixelsPerFrame, maxChars) < Math.Min(maxChars, 8);
 
     public static int DefaultAxisLabelStep(double frameRate) =>
         Math.Max(1, (int)Math.Round(frameRate > 0 ? frameRate : TimeUtil.DefaultFrameRate));
@@ -157,35 +166,14 @@ public static class PlayableTimingDiagram
 
         sb.AppendLine();
 
-        // ---- axis labels: 60f grid + clip/blend edges (no trailing pad) ----
-        var edgeFrames = new SortedSet<int>();
-        foreach (var c in sim.Clips)
-        {
-            edgeFrames.Add(c.StartFrame);
-            edgeFrames.Add(c.EndFrame);
-            if (c.BlendInFrames > 0)
-            {
-                edgeFrames.Add(c.BlendInEndFrame);
-            }
-
-            if (c.BlendOutFrames > 0)
-            {
-                edgeFrames.Add(c.BlendOutStartFrame);
-            }
-        }
-
-        // Bottom axis labels: always major grid (0,60,120,…) AND clip/blend edges.
-        // Do not drop majors near edges — that hid "120" while a highlight still drew a line.
+        // ---- axis labels: major grid + duration end only ----
+        // Clip/blend edges used to be labeled too; on dense package timelines (CanSubTimeline)
+        // that flooded the bottom with overlapping numbers. Edges still show as state diamonds.
         var labelFrames = new SortedSet<int>();
         if (sim.DurationFrames > 0)
         {
             labelFrames.Add(0);
             labelFrames.Add(sim.DurationFrames);
-        }
-
-        foreach (var e in edgeFrames)
-        {
-            labelFrames.Add(e);
         }
 
         for (var f = 0; f <= sim.DurationFrames; f += labelStep)
@@ -203,6 +191,10 @@ public static class PlayableTimingDiagram
         // ---- state changes: only clip activity (no Idle bubbles) ----
         // Do NOT emit a leading all-hidden @0 (empty start).
         // At clip end: {hidden} closes the capsule without a named Idle.
+        //
+        // CRITICAL: only re-emit a track when ITS state actually changes.
+        // Emitting every track at every global edge forced PlantUML to split long
+        // continuous clips (e.g. Animation) into many labeled capsules — unreadable.
         var stateFrames = new SortedSet<int>();
         foreach (var c in sim.Clips)
         {
@@ -231,41 +223,80 @@ public static class PlayableTimingDiagram
                 : QuoteState(options.IdleState);
         }
 
+        var idleState = Idle();
+        var prevState = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var f in stateFrames)
         {
-            sb.AppendLine(CultureInfo.InvariantCulture, $"@:{f}");
+            var changes = new List<(string Code, string State)>();
             foreach (var track in trackOrder)
             {
                 var code = trackCodes[track];
                 var state = ResolveStateAt(sim, track, f, options, Idle, ppf);
+                if (!prevState.TryGetValue(track, out var prev))
+                {
+                    // First time: skip pure idle (no leading all-hidden rows).
+                    if (state == idleState)
+                    {
+                        continue;
+                    }
+
+                    changes.Add((code, state));
+                    prevState[track] = state;
+                    continue;
+                }
+
+                if (prev == state)
+                {
+                    continue;
+                }
+
+                changes.Add((code, state));
+                prevState[track] = state;
+            }
+
+            if (changes.Count == 0)
+            {
+                continue;
+            }
+
+            // Bare @f (not @:f): only majors are labeled on the axis. PlantUML still
+            // accepts intermediate @edge times without an "as :N" bottom label.
+            sb.AppendLine(CultureInfo.InvariantCulture, $"@{f}");
+            foreach (var (code, state) in changes)
+            {
                 sb.AppendLine($"{code} is {state}");
             }
 
             sb.AppendLine();
         }
 
-        // ---- duration / blend: bare numbers only ----
-        // Skip duration arrows on very short clips (arrow text collides with neighbors).
-        const int minDurationArrowFrames = 12;
+        // ---- duration / blend arrows ----
+        // PlantUML constraint text sits ABOVE the bar — use it for short-clip names
+        // (capsule text won't fit; {-} flat is wrong for a real clip).
+        // Long clips: bare frame count; short clips: clip name.
+        const int minBlendArrowFrames = 8;
         if (options.ShowDurationMarkers || options.ShowBlendMarkers)
         {
             sb.AppendLine("' --- duration / blend ---");
             foreach (var c in sim.Clips)
             {
                 var code = trackCodes[c.TrackName];
-                if (options.ShowDurationMarkers && c.DurationFrames >= minDurationArrowFrames)
+                if (options.ShowDurationMarkers && c.DurationFrames > 0)
                 {
+                    var arrowLabel = PreferNameOnArrow(c.DurationFrames, ppf, options.MaxClipLabelChars)
+                        ? Escape(Shorten(c.ClipName, options.MaxClipLabelChars))
+                        : c.DurationFrames.ToString(CultureInfo.InvariantCulture);
                     sb.AppendLine(CultureInfo.InvariantCulture,
-                        $"{code}@{c.StartFrame} <-> @{c.EndFrame} : {c.DurationFrames}");
+                        $"{code}@{c.StartFrame} <-> @{c.EndFrame} : {arrowLabel}");
                 }
 
-                if (options.ShowBlendMarkers && c.BlendInFrames > 0 && c.BlendInFrames >= 4)
+                if (options.ShowBlendMarkers && c.BlendInFrames >= minBlendArrowFrames)
                 {
                     sb.AppendLine(CultureInfo.InvariantCulture,
                         $"{code}@{c.StartFrame} <-> @{c.BlendInEndFrame} : {c.BlendInFrames}");
                 }
 
-                if (options.ShowBlendMarkers && c.BlendOutFrames > 0 && c.BlendOutFrames >= 4)
+                if (options.ShowBlendMarkers && c.BlendOutFrames >= minBlendArrowFrames)
                 {
                     sb.AppendLine(CultureInfo.InvariantCulture,
                         $"{code}@{c.BlendOutStartFrame} <-> @{c.EndFrame} : {c.BlendOutFrames}");
@@ -343,38 +374,47 @@ public static class PlayableTimingDiagram
         }
 
         var c = onTrack[0];
-        var maxChars = LabelCharsForClip(c.DurationFrames, pixelsPerFrame, options.MaxClipLabelChars);
-        if (maxChars < 1)
+
+        // Size text by the *visible segment* (full clip, or just the blend-in/out slice).
+        // Using full-clip width put "can (out)" into an 18f band → collision.
+        var segmentFrames = c.DurationFrames;
+        string? blendSuffix = null;
+        if (options.ExpandBlendStates)
         {
-            // Too short for text — empty state keeps capsule without overlapping words
-            return "{-}";
+            if (c.BlendInFrames > 0 && f >= c.StartFrame && f < c.BlendInEndFrame)
+            {
+                segmentFrames = c.BlendInFrames;
+                blendSuffix = " (in)";
+            }
+            else if (c.BlendOutFrames > 0 && f >= c.BlendOutStartFrame && f < c.EndFrame)
+            {
+                segmentFrames = c.BlendOutFrames;
+                blendSuffix = " (out)";
+            }
         }
 
-        var label = Shorten(c.ClipName, maxChars);
+        // Always show the clip name in the capsule. PlantUML {-} is "flat" (unlabeled line)
+        // — not "short clip". If the bar is narrow, name also goes on the duration arrow.
+        var maxChars = Math.Max(1, LabelCharsForClip(segmentFrames, pixelsPerFrame, options.MaxClipLabelChars));
 
-        if (!options.ExpandBlendStates)
+        if (blendSuffix is not null)
         {
-            return QuoteState(label);
+            return QuoteState(ShortenWithSuffix(c.ClipName, blendSuffix, maxChars));
         }
 
-        if (c.BlendInFrames > 0 && f >= c.StartFrame && f < c.BlendInEndFrame)
-        {
-            return QuoteState(ShortenWithSuffix(c.ClipName, " (in)", maxChars));
-        }
-
-        if (c.BlendOutFrames > 0 && f >= c.BlendOutStartFrame && f < c.EndFrame)
-        {
-            return QuoteState(ShortenWithSuffix(c.ClipName, " (out)", maxChars));
-        }
-
-        return QuoteState(label);
+        return QuoteState(Shorten(c.ClipName, maxChars));
     }
 
     private static string Shorten(string name, int maxChars)
     {
-        if (maxChars < 4 || name.Length <= maxChars)
+        if (maxChars < 1 || name.Length <= maxChars)
         {
             return name;
+        }
+
+        if (maxChars == 1)
+        {
+            return name[..1];
         }
 
         return name[..(maxChars - 1)] + "…";
@@ -387,10 +427,11 @@ public static class PlayableTimingDiagram
             return name + suffix;
         }
 
+        // Prefer keeping the suffix when room is tight (e.g. "… (out)").
         var room = maxChars - suffix.Length - 1;
         if (room < 1)
         {
-            return suffix.Trim();
+            return Shorten(name, maxChars);
         }
 
         return name[..room] + "…" + suffix;

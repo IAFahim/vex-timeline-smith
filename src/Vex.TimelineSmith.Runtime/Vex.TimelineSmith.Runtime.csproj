@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <RootNamespace>Vex.TimelineSmith.Runtime</RootNamespace>
+    <Description>Headless timeline agents, clock, oracle, inbox, and batch runners.</Description>
+    <PackageId>Vex.TimelineSmith.Runtime</PackageId>
+    <PackageTags>$(PackageTags);runtime;agent</PackageTags>
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>

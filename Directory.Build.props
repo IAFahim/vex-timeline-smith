@@ -8,5 +8,49 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- Ir uses YamlDotNet reflection; Runtime is AOT-friendly. -->
     <IsAotCompatible Condition="'$(IsAotCompatible)' == ''">false</IsAotCompatible>
+
+    <!-- ===== NuGet / package identity ===== -->
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+
+    <Authors>IAFahim</Authors>
+    <Company>Vex</Company>
+    <Copyright>Copyright (c) IAFahim</Copyright>
+    <Product>Vex.TimelineSmith</Product>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/IAFahim/vex-timeline-smith</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/IAFahim/vex-timeline-smith</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>unity;timeline;plantuml;playable;offline;statesmith;vex</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Initial NuGet release: IR agents, Unity .playable inspect/run, PlantUML timing + lossless reverse.</PackageReleaseNotes>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Public API docs are incremental; don't block pack on missing XML comments. -->
+    <NoWarn>$(NoWarn);CS1591;CS1587</NoWarn>
+
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts/nuget/</PackageOutputPath>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Ship repo README inside each nupkg (PackageReadmeFile). -->
+    <None Include="$(MSBuildThisFileDirectory)README.md"
+          Pack="true"
+          PackagePath="\"
+          Condition="Exists('$(MSBuildThisFileDirectory)README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
 </Project>

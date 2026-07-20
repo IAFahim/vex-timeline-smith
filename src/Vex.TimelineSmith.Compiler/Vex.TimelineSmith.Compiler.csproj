@@ -1,14 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Vex.TimelineSmith.Compiler</RootNamespace>
+    <Description>Compile Timeline IR to tables dumps and C# stubs.</Description>
+    <PackageId>Vex.TimelineSmith.Compiler</PackageId>
+    <PackageTags>$(PackageTags);compiler</PackageTags>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vex.TimelineSmith.Ir\Vex.TimelineSmith.Ir.csproj" />
     <ProjectReference Include="..\Vex.TimelineSmith.Runtime\Vex.TimelineSmith.Runtime.csproj" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
 </Project>

@@ -3,4 +3,6 @@ obj/
 .vs/
 *.user
 artifacts/
+*.nupkg
+*.snupkg
 samples/**/gen/

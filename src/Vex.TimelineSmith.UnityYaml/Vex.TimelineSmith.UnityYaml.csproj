@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>Vex.TimelineSmith.UnityYaml</RootNamespace>
-    <Description>Offline read of Unity Timeline .playable (text YAML) assets.</Description>
+    <Description>
+      Offline Unity Timeline .playable (text YAML): inspect tracks, run-at-frame,
+      PlantUML timing export, and lossless playable↔puml reverse via embedded bytes.
+    </Description>
+    <PackageId>Vex.TimelineSmith.UnityYaml</PackageId>
+    <PackageTags>$(PackageTags);unity;playable;plantuml</PackageTags>
   </PropertyGroup>
 </Project>
