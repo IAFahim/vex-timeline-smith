@@ -5,13 +5,10 @@ namespace Vex.TimelineSmith.Tests;
 
 public class PlayableTimingDiagramTests
 {
-    private static string TmpTimeline =>
-        "/home/i/GitHub/com.vex.unity.vex-ee/Assets/tmpTimeline.playable";
-
     [Fact]
     public void Generates_frames_with_60f_major_and_clip_edge_markers()
     {
-        var puml = PlayableTimingDiagram.GenerateFromFile(TmpTimeline);
+        var puml = PlayableTimingDiagram.GenerateFromFile(PlayablePaths.TmpTimeline);
         puml.Should().Contain("manual time-axis");
         // per-frame width (no pad to next 60f); timegrid must be hidden
         puml.Should().Contain("scale 1 as ");
@@ -45,8 +42,7 @@ public class PlayableTimingDiagramTests
     {
         // Long clip on one track + short clips on another must not re-declare the long clip
         // at every short-clip edge (that chopped Animation into unreadable capsules).
-        var report = PlayableInspector.InspectFile(
-            "/home/i/GitHub/vex-timeline-smith/tests/Vex.TimelineSmith.Tests/Fixtures/Playables/01_CanSubTimeline.playable");
+        var report = PlayableInspector.InspectFile(PlayablePaths.CanSubTimeline);
         var sim = PlayableRun.FromReport(report);
         var puml = PlayableTimingDiagram.Generate(sim);
         // Animation is continuous 0→491: only start (+ maybe blend) and end should set it
@@ -70,7 +66,7 @@ public class PlayableTimingDiagramTests
     public void Theme_is_injected_after_startuml()
     {
         var puml = PlayableTimingDiagram.GenerateFromFile(
-            TmpTimeline,
+            PlayablePaths.TmpTimeline,
             new PlayableTimingDiagram.Options(Theme: "cyborg"));
         var lines = puml.Split('\n');
         lines[0].Trim().Should().Be("@startuml");
@@ -81,11 +77,11 @@ public class PlayableTimingDiagramTests
     public void Blend_fields_parsed_and_markers_emitted_when_nonzero()
     {
         // synthetic: build sim with blend
-        var report = PlayableInspector.InspectFile(TmpTimeline);
+        var report = PlayableInspector.InspectFile(PlayablePaths.TmpTimeline);
         var sim = PlayableRun.FromReport(report);
         // sample has blend 0 — inject by constructing flat clip
         var clip = sim.Clips[0];
-        // 30f blend-in is long enough for an "(in)" label; 5f out stays empty {-}
+        // 30f blend-in is long enough for an "(in)" label
         var withBlend = clip with { BlendInFrames = 30, BlendOutFrames = 5 };
         var sim2 = sim with { Clips = new[] { withBlend } };
         var puml = PlayableTimingDiagram.Generate(sim2);
