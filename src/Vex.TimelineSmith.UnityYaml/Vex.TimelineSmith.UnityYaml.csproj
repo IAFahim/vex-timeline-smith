@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Vex.TimelineSmith.UnityYaml</RootNamespace>
+    <Description>Offline read of Unity Timeline .playable (text YAML) assets.</Description>
+  </PropertyGroup>
+</Project>

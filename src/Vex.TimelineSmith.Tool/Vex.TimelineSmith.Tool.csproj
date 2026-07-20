@@ -4,6 +4,7 @@
     <ProjectReference Include="..\Vex.TimelineSmith.Ir\Vex.TimelineSmith.Ir.csproj" />
     <ProjectReference Include="..\Vex.TimelineSmith.Compiler\Vex.TimelineSmith.Compiler.csproj" />
     <ProjectReference Include="..\Vex.TimelineSmith.Runtime\Vex.TimelineSmith.Runtime.csproj" />
+    <ProjectReference Include="..\Vex.TimelineSmith.UnityYaml\Vex.TimelineSmith.UnityYaml.csproj" />
   </ItemGroup>
 
   <ItemGroup>

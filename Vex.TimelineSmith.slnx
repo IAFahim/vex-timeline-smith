@@ -4,6 +4,7 @@
     <Project Path="src/Vex.TimelineSmith.Ir/Vex.TimelineSmith.Ir.csproj" />
     <Project Path="src/Vex.TimelineSmith.Runtime/Vex.TimelineSmith.Runtime.csproj" />
     <Project Path="src/Vex.TimelineSmith.Tool/Vex.TimelineSmith.Tool.csproj" />
+    <Project Path="src/Vex.TimelineSmith.UnityYaml/Vex.TimelineSmith.UnityYaml.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Vex.TimelineSmith.Tests/Vex.TimelineSmith.Tests.csproj" />
