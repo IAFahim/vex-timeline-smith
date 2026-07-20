@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vex.timeline-ir.v1",
+  "title": "Vex Timeline IR v1",
+  "type": "object",
+  "required": ["schema_id", "schema_version", "id", "time", "director", "tracks"],
+  "properties": {
+    "schema_id": { "const": "vex.timeline-ir" },
+    "schema_version": { "const": 1 },
+    "id": { "type": "string" },
+    "time": {
+      "type": "object",
+      "required": ["unit", "tick_hz"],
+      "properties": {
+        "unit": { "const": "ticks" },
+        "tick_hz": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "director": {
+      "type": "object",
+      "required": ["duration_ticks", "wrap"],
+      "properties": {
+        "duration_ticks": { "type": "integer", "minimum": 1 },
+        "wrap": { "enum": ["none", "hold", "loop"] },
+        "sample_last_frame": { "type": "boolean" },
+        "initial_time_ticks": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tracks": { "type": "array" },
+    "events": { "type": "array" }
+  }
+}

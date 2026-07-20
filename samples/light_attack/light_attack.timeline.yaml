@@ -1,0 +1,64 @@
+schema_id: vex.timeline-ir
+schema_version: 1
+id: attack_light
+
+time:
+  unit: ticks
+  tick_hz: 60
+
+director:
+  duration_ticks: 48
+  wrap: hold
+  sample_last_frame: true
+  initial_time_ticks: 0
+
+tracks:
+  - id: body
+    binding_slot: self
+    overlap: forbid
+    clips:
+      - id: startup
+        start_tick: 0
+        end_tick: 7
+        kind: phase
+        payload:
+          phase: startup
+      - id: active
+        start_tick: 7
+        end_tick: 17
+        kind: hitbox
+        payload:
+          damage: 10
+          hitbox: light_A
+      - id: recovery
+        start_tick: 17
+        end_tick: 48
+        kind: phase
+        payload:
+          phase: recovery
+
+  - id: vfx
+    binding_slot: self
+    overlap: forbid
+    clips:
+      - id: swing_fx
+        start_tick: 6
+        end_tick: 21
+        kind: signal
+        payload:
+          fx: swing_light
+
+events:
+  - name: ACTIVE_BEGIN
+    when:
+      track: body
+      clip: active
+      edge: enter
+  - name: ACTIVE_END
+    when:
+      track: body
+      clip: active
+      edge: exit
+  - name: ATTACK_DONE
+    when:
+      director: hold_reached
