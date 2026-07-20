@@ -49,8 +49,16 @@ public static class PlayableRun
     {
         var fps = report.FrameRate > 0 ? report.FrameRate : TimeUtil.DefaultFrameRate;
         var clips = new List<FlatClip>();
+        // Unique lane names when Unity groups repeat "Animation Track" etc.
+        var nameCounts = new Dictionary<string, int>(StringComparer.Ordinal);
         foreach (var track in report.AllTracks)
         {
+            var baseName = string.IsNullOrWhiteSpace(track.Name) ? "(unnamed)" : track.Name;
+            nameCounts.TryGetValue(baseName, out var n);
+            n++;
+            nameCounts[baseName] = n;
+            var laneName = n == 1 ? baseName : $"{baseName} ·{n}";
+
             foreach (var c in track.Clips)
             {
                 var startSec = c.Start;
@@ -79,7 +87,7 @@ public static class PlayableRun
                 }
 
                 clips.Add(new FlatClip(
-                    track.Name,
+                    laneName,
                     track.TypeName,
                     c.DisplayName,
                     sf,

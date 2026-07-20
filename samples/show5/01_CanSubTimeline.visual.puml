@@ -1,0 +1,229 @@
+@startuml
+!theme plain
+<style>
+timingDiagram {
+  timegrid {
+    LineColor transparent
+    LineThickness 0
+  }
+}
+</style>
+' Generated from Unity Timeline: /home/i/GitHub/vex-timeline-smith/tests/Vex.TimelineSmith.Tests/Fixtures/Playables/01_CanSubTimeline.playable
+' fps=60  duration=491f  clips=15  px/frame=4
+manual time-axis
+scale 1 as 4 pixels
+
+concise "Animation Track" as AnimationTrack_0
+concise "Audio Track (3)" as AudioTrack3_1
+concise "Can Particles" as CanParticles_2
+
+@0 as :0
+@8 as :8
+@30 as :30
+@58 as :58
+@60 as :60
+@68 as :68
+@76 as :76
+@78 as :78
+@109 as :109
+@118 as :118
+@120 as :120
+@132 as :132
+@138 as :138
+@180 as :180
+@181 as :181
+@196 as :196
+@210 as :210
+@240 as :240
+@241 as :241
+@260 as :260
+@272 as :272
+@275 as :275
+@300 as :300
+@320 as :320
+@332 as :332
+@335 as :335
+@359 as :359
+@360 as :360
+@362 as :362
+@381 as :381
+@398 as :398
+@411 as :411
+@415 as :415
+@420 as :420
+@480 as :480
+@491 as :491
+
+@:0
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is table
+CanParticles_2 is {hidden}
+
+@:8
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is table
+CanParticles_2 is "GoopSprayEf…"
+
+@:30
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is can
+CanParticles_2 is "GoopSprayEf…"
+
+@:58
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is "can (out)"
+CanParticles_2 is "GoopSprayEf…"
+
+@:68
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is "can (out)"
+CanParticles_2 is {hidden}
+
+@:76
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is canRoll
+CanParticles_2 is {hidden}
+
+@:78
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is canRoll
+CanParticles_2 is "GoopSprayEf…"
+
+@:109
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is "GoopSprayEf…"
+
+@:118
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is "boun…"
+CanParticles_2 is "GoopSprayEf…"
+
+@:132
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is "GoopSprayEf…"
+
+@:138
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is {hidden}
+
+@:181
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is "GoopSprayEf…"
+
+@:196
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is "boun…"
+CanParticles_2 is "GoopSprayEf…"
+
+@:210
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is "GoopSprayEf…"
+
+@:241
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is {hidden}
+
+@:260
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is bounce
+CanParticles_2 is {hidden}
+
+@:272
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is bounce
+CanParticles_2 is "GoopSprayEf…"
+
+@:275
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is "GoopSprayEf…"
+
+@:320
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is bounce
+CanParticles_2 is "GoopSprayEf…"
+
+@:332
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is bounce
+CanParticles_2 is {hidden}
+
+@:335
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is {hidden}
+
+@:359
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is "GoopSprayEf…"
+
+@:362
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is bounce
+CanParticles_2 is "GoopSprayEf…"
+
+@:381
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is "GoopSprayEf…"
+
+@:398
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is bounce
+CanParticles_2 is "GoopSprayEf…"
+
+@:411
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is bounce
+CanParticles_2 is {hidden}
+
+@:415
+AnimationTrack_0 is "Can Animati…"
+AudioTrack3_1 is {hidden}
+CanParticles_2 is {hidden}
+
+@:491
+AnimationTrack_0 is {hidden}
+AudioTrack3_1 is {hidden}
+CanParticles_2 is {hidden}
+
+' --- duration / blend ---
+AnimationTrack_0@0 <-> @491 : 491
+AudioTrack3_1@0 <-> @30 : 30
+CanParticles_2@8 <-> @68 : 60
+AudioTrack3_1@30 <-> @76 : 46
+AudioTrack3_1@58 <-> @76 : 18
+AudioTrack3_1@58 <-> @109 : 51
+AudioTrack3_1@58 <-> @76 : 18
+CanParticles_2@78 <-> @138 : 60
+AudioTrack3_1@118 <-> @132 : 14
+CanParticles_2@181 <-> @241 : 60
+AudioTrack3_1@196 <-> @210 : 14
+AudioTrack3_1@260 <-> @275 : 15
+CanParticles_2@272 <-> @332 : 60
+AudioTrack3_1@320 <-> @335 : 15
+CanParticles_2@359 <-> @411 : 52
+AudioTrack3_1@362 <-> @381 : 19
+AudioTrack3_1@398 <-> @415 : 17
+
+' --- major frame guides ---
+highlight 0 to 0.01 #B0B0B0
+highlight 60 to 60.01 #B0B0B0
+highlight 120 to 120.01 #B0B0B0
+highlight 180 to 180.01 #B0B0B0
+highlight 240 to 240.01 #B0B0B0
+highlight 300 to 300.01 #B0B0B0
+highlight 360 to 360.01 #B0B0B0
+highlight 420 to 420.01 #B0B0B0
+highlight 480 to 480.01 #B0B0B0
+
+@enduml
+
+'

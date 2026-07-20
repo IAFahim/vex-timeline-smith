@@ -1,0 +1,19 @@
+@startuml
+!theme plain
+<style>
+timingDiagram {
+  timegrid {
+    LineColor transparent
+    LineThickness 0
+  }
+}
+</style>
+' Generated from Unity Timeline: /home/i/GitHub/vex-timeline-smith/tests/Vex.TimelineSmith.Tests/Fixtures/Playables/06_Activation.playable
+' fps=60  duration=0f  clips=0  px/frame=4
+manual time-axis
+scale 1 as 4 pixels
+
+' (no clips)
+@enduml
+
+'

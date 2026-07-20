@@ -1,0 +1,44 @@
+@startuml
+!theme plain
+<style>
+timingDiagram {
+  timegrid {
+    LineColor transparent
+    LineThickness 0
+  }
+}
+</style>
+' Generated from Unity Timeline: /home/i/GitHub/vex-timeline-smith/tests/Vex.TimelineSmith.Tests/Fixtures/Playables/05_tmpTimeline.playable
+' fps=60  duration=169f  clips=2  px/frame=4
+manual time-axis
+scale 1 as 4 pixels
+
+concise "Particle System Track" as ParticleSystemTrack_0
+concise "Visual Effect Track" as VisualEffectTrack_1
+
+@0 as :0
+@60 as :60
+@109 as :109
+@120 as :120
+@169 as :169
+
+@:109
+ParticleSystemTrack_0 is "ParticleSys…"
+VisualEffectTrack_1 is "VisualEffec…"
+
+@:169
+ParticleSystemTrack_0 is {hidden}
+VisualEffectTrack_1 is {hidden}
+
+' --- duration / blend ---
+ParticleSystemTrack_0@109 <-> @169 : 60
+VisualEffectTrack_1@109 <-> @169 : 60
+
+' --- major frame guides ---
+highlight 0 to 0.01 #B0B0B0
+highlight 60 to 60.01 #B0B0B0
+highlight 120 to 120.01 #B0B0B0
+
+@enduml
+
+'

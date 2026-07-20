@@ -1,0 +1,50 @@
+@startuml
+!theme plain
+<style>
+timingDiagram {
+  timegrid {
+    LineColor transparent
+    LineThickness 0
+  }
+}
+</style>
+' Generated from Unity Timeline: /home/i/GitHub/vex-timeline-smith/tests/Vex.TimelineSmith.Tests/Fixtures/Playables/08_Timeline.playable
+' fps=60  duration=79f  clips=2  px/frame=4
+manual time-axis
+scale 1 as 4 pixels
+
+concise "Physics Velocity Track" as PhysicsVelocityTrack_0
+concise "Stateful Trigger Track" as StatefulTriggerTrack_1
+
+@0 as :0
+@19 as :19
+@60 as :60
+@79 as :79
+
+@:0
+PhysicsVelocityTrack_0 is "PhysicsVelo…"
+StatefulTriggerTrack_1 is {hidden}
+
+@:19
+PhysicsVelocityTrack_0 is "PhysicsVelo…"
+StatefulTriggerTrack_1 is "PhysicsTrig…"
+
+@:60
+PhysicsVelocityTrack_0 is {hidden}
+StatefulTriggerTrack_1 is "PhysicsTrig…"
+
+@:79
+PhysicsVelocityTrack_0 is {hidden}
+StatefulTriggerTrack_1 is {hidden}
+
+' --- duration / blend ---
+PhysicsVelocityTrack_0@0 <-> @60 : 60
+StatefulTriggerTrack_1@19 <-> @79 : 60
+
+' --- major frame guides ---
+highlight 0 to 0.01 #B0B0B0
+highlight 60 to 60.01 #B0B0B0
+
+@enduml
+
+'

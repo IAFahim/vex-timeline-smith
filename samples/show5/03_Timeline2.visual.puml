@@ -1,0 +1,112 @@
+@startuml
+!theme plain
+<style>
+timingDiagram {
+  timegrid {
+    LineColor transparent
+    LineThickness 0
+  }
+}
+</style>
+' Generated from Unity Timeline: /home/i/GitHub/vex-timeline-smith/tests/Vex.TimelineSmith.Tests/Fixtures/Playables/03_Timeline2.playable
+' fps=60  duration=800f  clips=6  px/frame=4
+manual time-axis
+scale 1 as 4 pixels
+
+concise "Position Track" as PositionTrack_0
+concise "Rotation Track" as RotationTrack_1
+
+@0 as :0
+@32 as :32
+@42 as :42
+@60 as :60
+@90 as :90
+@120 as :120
+@180 as :180
+@240 as :240
+@300 as :300
+@311 as :311
+@360 as :360
+@420 as :420
+@480 as :480
+@482 as :482
+@540 as :540
+@600 as :600
+@650 as :650
+@660 as :660
+@720 as :720
+@730 as :730
+@780 as :780
+@800 as :800
+
+@:0
+PositionTrack_0 is "MoveToStart…"
+RotationTrack_1 is "LookAtStart…"
+
+@:32
+PositionTrack_0 is "MoveT… (out)"
+RotationTrack_1 is "LookAtStart…"
+
+@:42
+PositionTrack_0 is "MoveT… (out)"
+RotationTrack_1 is "LookA… (out)"
+
+@:90
+PositionTrack_0 is "MoveT… (out)"
+RotationTrack_1 is "LookAtTarge…"
+
+@:311
+PositionTrack_0 is "MovePositio…"
+RotationTrack_1 is "LookAtTarge…"
+
+@:482
+PositionTrack_0 is "MoveP… (out)"
+RotationTrack_1 is "LookAtTarge…"
+
+@:650
+PositionTrack_0 is "MoveP… (out)"
+RotationTrack_1 is "LookA… (out)"
+
+@:730
+PositionTrack_0 is "MoveToStart…"
+RotationTrack_1 is "LookAtStart…"
+
+@:800
+PositionTrack_0 is {hidden}
+RotationTrack_1 is {hidden}
+
+' --- duration / blend ---
+PositionTrack_0@0 <-> @311 : 311
+PositionTrack_0@32 <-> @311 : 279
+RotationTrack_1@0 <-> @90 : 90
+RotationTrack_1@42 <-> @90 : 48
+PositionTrack_0@32 <-> @730 : 698
+PositionTrack_0@32 <-> @311 : 279
+PositionTrack_0@482 <-> @730 : 248
+RotationTrack_1@42 <-> @730 : 688
+RotationTrack_1@42 <-> @90 : 48
+RotationTrack_1@650 <-> @730 : 80
+PositionTrack_0@482 <-> @800 : 318
+PositionTrack_0@482 <-> @730 : 248
+RotationTrack_1@650 <-> @800 : 150
+RotationTrack_1@650 <-> @730 : 80
+
+' --- major frame guides ---
+highlight 0 to 0.01 #B0B0B0
+highlight 60 to 60.01 #B0B0B0
+highlight 120 to 120.01 #B0B0B0
+highlight 180 to 180.01 #B0B0B0
+highlight 240 to 240.01 #B0B0B0
+highlight 300 to 300.01 #B0B0B0
+highlight 360 to 360.01 #B0B0B0
+highlight 420 to 420.01 #B0B0B0
+highlight 480 to 480.01 #B0B0B0
+highlight 540 to 540.01 #B0B0B0
+highlight 600 to 600.01 #B0B0B0
+highlight 660 to 660.01 #B0B0B0
+highlight 720 to 720.01 #B0B0B0
+highlight 780 to 780.01 #B0B0B0
+
+@enduml
+
+'

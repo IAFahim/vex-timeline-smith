@@ -33,7 +33,20 @@ public static class PlayableTimingDiagram
         bool EmitTitle = false,
         string? Theme = null,
         /// <summary>Max chars in clip bubble; longer names are truncated with …</summary>
-        int MaxClipLabelChars = 18);
+        int MaxClipLabelChars = 12);
+
+        /// <summary>How many label chars fit in a clip of this length (px/frame).</summary>
+        public static int LabelCharsForClip(int durationFrames, int pixelsPerFrame, int maxChars)
+        {
+            // ~7px per character in PlantUML capsules; leave margin for diamond ends
+            var fit = Math.Max(0, (durationFrames * pixelsPerFrame - 16) / 7);
+            if (fit < 1)
+            {
+                return 0; // too short — empty bubble, duration arrow carries the number
+            }
+
+            return Math.Min(maxChars, fit);
+        }
 
     public static int DefaultAxisLabelStep(double frameRate) =>
         Math.Max(1, (int)Math.Round(frameRate > 0 ? frameRate : TimeUtil.DefaultFrameRate));
@@ -224,7 +237,7 @@ public static class PlayableTimingDiagram
             foreach (var track in trackOrder)
             {
                 var code = trackCodes[track];
-                var state = ResolveStateAt(sim, track, f, options, Idle);
+                var state = ResolveStateAt(sim, track, f, options, Idle, ppf);
                 sb.AppendLine($"{code} is {state}");
             }
 
@@ -232,25 +245,27 @@ public static class PlayableTimingDiagram
         }
 
         // ---- duration / blend: bare numbers only ----
+        // Skip duration arrows on very short clips (arrow text collides with neighbors).
+        const int minDurationArrowFrames = 12;
         if (options.ShowDurationMarkers || options.ShowBlendMarkers)
         {
             sb.AppendLine("' --- duration / blend ---");
             foreach (var c in sim.Clips)
             {
                 var code = trackCodes[c.TrackName];
-                if (options.ShowDurationMarkers)
+                if (options.ShowDurationMarkers && c.DurationFrames >= minDurationArrowFrames)
                 {
                     sb.AppendLine(CultureInfo.InvariantCulture,
                         $"{code}@{c.StartFrame} <-> @{c.EndFrame} : {c.DurationFrames}");
                 }
 
-                if (options.ShowBlendMarkers && c.BlendInFrames > 0)
+                if (options.ShowBlendMarkers && c.BlendInFrames > 0 && c.BlendInFrames >= 4)
                 {
                     sb.AppendLine(CultureInfo.InvariantCulture,
                         $"{code}@{c.StartFrame} <-> @{c.BlendInEndFrame} : {c.BlendInFrames}");
                 }
 
-                if (options.ShowBlendMarkers && c.BlendOutFrames > 0)
+                if (options.ShowBlendMarkers && c.BlendOutFrames > 0 && c.BlendOutFrames >= 4)
                 {
                     sb.AppendLine(CultureInfo.InvariantCulture,
                         $"{code}@{c.BlendOutStartFrame} <-> @{c.EndFrame} : {c.BlendOutFrames}");
@@ -315,7 +330,8 @@ public static class PlayableTimingDiagram
         string track,
         int f,
         Options options,
-        Func<string> idle)
+        Func<string> idle,
+        int pixelsPerFrame)
     {
         var onTrack = sim.Clips
             .Where(c => c.TrackName == track && c.IsActiveAtFrame(f))
@@ -327,7 +343,14 @@ public static class PlayableTimingDiagram
         }
 
         var c = onTrack[0];
-        var label = Shorten(c.ClipName, options.MaxClipLabelChars);
+        var maxChars = LabelCharsForClip(c.DurationFrames, pixelsPerFrame, options.MaxClipLabelChars);
+        if (maxChars < 1)
+        {
+            // Too short for text — empty state keeps capsule without overlapping words
+            return "{-}";
+        }
+
+        var label = Shorten(c.ClipName, maxChars);
 
         if (!options.ExpandBlendStates)
         {
@@ -336,12 +359,12 @@ public static class PlayableTimingDiagram
 
         if (c.BlendInFrames > 0 && f >= c.StartFrame && f < c.BlendInEndFrame)
         {
-            return QuoteState(ShortenWithSuffix(c.ClipName, " (in)", options.MaxClipLabelChars));
+            return QuoteState(ShortenWithSuffix(c.ClipName, " (in)", maxChars));
         }
 
         if (c.BlendOutFrames > 0 && f >= c.BlendOutStartFrame && f < c.EndFrame)
         {
-            return QuoteState(ShortenWithSuffix(c.ClipName, " (out)", options.MaxClipLabelChars));
+            return QuoteState(ShortenWithSuffix(c.ClipName, " (out)", maxChars));
         }
 
         return QuoteState(label);
